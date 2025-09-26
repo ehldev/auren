@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Distribuidora — Eficiencia & Confianza (V2)</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bungee:wght@400&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- AOS -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css"/>
+
+  <!-- Remix Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/>
+
+  <style>
+    :root{
+      /* Paleta chicha v2 (más verdes) */
+      --pink:   #FF2FB9;
+      --lime:   #C8FF00;
+      --green:  #39FF14;
+      --blue:   #00E5FF;
+      --purple: #7A00FF;
+      --orange: #FF7A00;
+      --ink: #0b0b0b;
+      --bg1:#0a0a0a; --bg2:#101010; --bg3:#151515;
+    }
+
+    .title-font{ font-family:"Bungee",system-ui,sans-serif; }
+    .body-font{ font-family:"Inter",ui-sans-serif,system-ui,-apple-system; }
+
+    /* HERO V2 — fondo mesh + blobs animados */
+    .mesh {
+      background:
+        radial-gradient(1000px 600px at 10% 15%, rgba(200,255,0,.12), transparent 60%),
+        radial-gradient(900px 500px at 90% 12%, rgba(122,0,255,.18), transparent 60%),
+        radial-gradient(1200px 700px at 50% 95%, rgba(0,229,255,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      position:relative; overflow:hidden;
+    }
+    .noise:after{
+      content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' opacity='0.1' viewBox='0 0 100 100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .blob {
+      position:absolute; filter:blur(26px); opacity:.6;
+      animation: float 12s ease-in-out infinite;
+    }
+    @keyframes float{
+      0%{ transform: translate(0,0) scale(1); }
+      50%{ transform: translate(20px,-14px) scale(1.08); }
+      100%{ transform: translate(0,0) scale(1); }
+    }
+
+    /* Cinta diagonal del hero */
+    .diag {
+      background: linear-gradient(100deg, transparent 0 24%, rgba(255,255,255,.08) 24% 26%, transparent 26% 100%);
+      mask: linear-gradient(180deg, transparent, #000 10% 90%, transparent 100%);
+    }
+
+    /* Título con contorno brillante */
+    .stroke {
+      color: var(--lime);
+      text-shadow:
+        -2px -2px 0 var(--ink), 2px -2px 0 var(--ink),
+        -2px  2px 0 var(--ink), 2px  2px 0 var(--ink),
+        0 0 26px rgba(200,255,0,.35);
+    }
+
+    /* Botón con halo */
+    .btn-glow {
+      box-shadow: 0 0 0 0 rgba(57,255,20,.9);
+      animation: pulseGlow 2.7s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(57,255,20,.8); }
+      70%{ box-shadow: 0 0 34px 14px rgba(57,255,20,.12); }
+      100%{ box-shadow: 0 0 0 0 rgba(57,255,20,0); }
+    }
+
+    /* Sticker conico */
+    .sticker {
+      background: conic-gradient(from 0deg,
+        var(--pink), var(--orange), var(--lime), var(--green), var(--blue), var(--purple), var(--pink));
+      box-shadow: 0 12px 30px rgba(0,0,0,.38), inset 0 0 0 6px #111;
+    }
+
+    /* Tarjetas y chips */
+    .card { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.10); }
+    .chip { border: 2px dashed rgba(255,255,255,.22); background: rgba(255,255,255,.06); backdrop-filter: blur(6px); }
+
+    /* Borde degradado utilitario */
+    .grad-border{ position:relative; border-radius:16px; }
+    .grad-border:before{
+      content:""; position:absolute; inset:-1px; z-index:-1; border-radius:18px;
+      background:linear-gradient(90deg, var(--green), var(--lime), var(--blue));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; padding:1px;
+    }
+
+    /* Marquee */
+    .marquee{ overflow:hidden; white-space:nowrap; border-block:1px dashed rgba(255,255,255,.18); }
+    .marquee .inner{ display:inline-block; padding-block:10px; animation: slide 20s linear infinite; }
+    @keyframes slide { from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
+
+    /* Wavy recorte */
+    .wavy{ --w:18px; mask: radial-gradient(10px at 10px 50%, #0000 98%, #000) calc(var(--w)/-2) 0/var(--w) 100%; clip-path: inset(0 round 22px); }
+
+    /* Slider básico (categorías/testimonios) */
+    .snap-x{ scroll-snap-type:x mandatory; }
+    .snap{ scroll-snap-align:start; }
+
+    /* Footer */
+    .footer-grad{ background: radial-gradient(800px 400px at 20% -10%, rgba(200,255,0,.15), transparent 60%), linear-gradient(180deg, #0B0B0B, #0A0A0A 60%); }
+  </style>
+</head>
+
+<body class="body-font text-white bg-[#0a0a0a]">
+  <!-- HERO V2 -->
+  <header class="mesh noise">
+    <!-- blobs -->
+    <span class="blob left-[-60px] top-[-40px] w-[260px] h-[260px] rounded-full" style="background:radial-gradient(circle at 30% 30%, var(--pink), transparent 60%);"></span>
+    <span class="blob right-[-40px] top-[10%] w-[320px] h-[320px] rounded-full" style="background:radial-gradient(circle at 70% 50%, var(--green), transparent 60%); animation-delay: .8s;"></span>
+    <span class="blob left-[30%] bottom-[-60px] w-[300px] h-[300px] rounded-full" style="background:radial-gradient(circle at 50% 50%, var(--blue), transparent 60%); animation-delay: 1.3s;"></span>
+
+    <nav class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-11 w-11 rounded-full sticker"></div>
+        <span class="title-font text-xl tracking-wide"
+          style="color:var(--blue); text-shadow:-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111,1px 1px 0 #111;">Distribuidora</span>
+      </div>
+      <div class="hidden md:flex items-center gap-5 text-sm">
+        <a href="#servicios" class="opacity-80 hover:opacity-100 transition">Servicios</a>
+        <a href="#categorias" class="opacity-80 hover:opacity-100 transition">Categorías</a>
+        <a href="#proceso" class="opacity-80 hover:opacity-100 transition">Proceso</a>
+        <a href="#clientes" class="opacity-80 hover:opacity-100 transition">Testimonios</a>
+        <a href="#contacto" class="opacity-80 hover:opacity-100 transition">Contacto</a>
+        <a href="#cta" class="ml-2 inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold"
+           style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">
+          Cotizar ahora <i class="ri-flashlight-fill text-base"></i>
+        </a>
+      </div>
+      <button class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg border border-white/15">
+        <i class="ri-menu-3-line"></i>
+      </button>
+    </nav>
+
+    <!-- Banner diagonal + contenido -->
+    <section class="relative diag">
+      <div class="max-w-7xl mx-auto px-6 pt-4 pb-16 md:pt-10 md:pb-24 grid md:grid-cols-12 gap-10 items-center">
+        <!-- Texto -->
+        <div class="md:col-span-7">
+          <div class="inline-block mb-4 chip rounded-full px-3 py-1 text-[11px] uppercase tracking-widest"
+               data-aos="fade-up"><span class="mr-1">⚡</span> Logística ágil & confiable</div>
+
+          <h1 class="title-font stroke text-4xl leading-tight md:text-6xl md:leading-[1.05]"
+              data-aos="fade-up" data-aos-delay="60">
+            Impulsamos la <span class="bg-clip-text text-transparent"
+              style="background-image:linear-gradient(90deg,var(--pink),var(--lime));">distribución</span> de tus productos con
+            <span class="bg-clip-text text-transparent"
+              style="background-image:linear-gradient(90deg,var(--green),var(--blue));">eficiencia</span> y
+            <span class="bg-clip-text text-transparent"
+              style="background-image:linear-gradient(90deg,var(--orange),var(--purple));">confianza</span>
+          </h1>
+
+          <p class="mt-5 text-white/85 max-w-2xl text-base md:text-lg"
+             data-aos="fade-up" data-aos-delay="120">
+            Hacemos que tus productos lleguen con la eficiencia que necesitas y la confianza que tu negocio merece,
+            integrando diversas categorías en una sola operación de distribución.
+          </p>
+
+          <div id="cta" class="mt-7 flex flex-wrap items-center gap-3" data-aos="fade-up" data-aos-delay="160">
+            <a href="#contacto" class="btn-glow rounded-2xl px-5 py-3 font-extrabold title-font"
+               style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">
+              ¡Quiero cotizar!
+            </a>
+            <a href="#categorias" class="rounded-2xl px-5 py-3 font-semibold border border-white/20 hover:border-white/40 transition">
+              Ver categorías
+            </a>
+          </div>
+
+          <!-- Chips -->
+          <div class="mt-7 flex flex-wrap gap-2" id="categorias-chips" data-aos="fade-up" data-aos-delay="220">
+            <span class="chip rounded-full px-3 py-1 text-sm">Bebidas</span>
+            <span class="chip rounded-full px-3 py-1 text-sm">Snacks</span>
+            <span class="chip rounded-full px-3 py-1 text-sm">Limpieza</span>
+            <span class="chip rounded-full px-3 py-1 text-sm">Cuidado Personal</span>
+            <span class="chip rounded-full px-3 py-1 text-sm">Mascotas</span>
+            <span class="chip rounded-full px-3 py-1 text-sm">Hogar</span>
+          </div>
+        </div>
+
+        <!-- Visual/afiche -->
+        <div class="md:col-span-5 relative" data-aos="fade-left" data-aos-delay="180">
+          <div class="relative rounded-3xl overflow-hidden border-4 border-black/60 shadow-[0_25px_60px_rgba(0,0,0,.45)] grad-border">
+            <div class="absolute inset-0 pointer-events-none"
+                 style="background:repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, rgba(255,255,255,0) 10px 20px); border:6px solid #111;"></div>
+            <div class="aspect-[4/5] bg-gradient-to-br from-[#202020] via-[#151515] to-[#0f0f0f] flex items-center justify-center">
+              <div class="text-center px-6">
+                <div class="mx-auto h-20 w-20 rounded-full sticker animate-pulse"></div>
+                <p class="mt-4 text-lg font-semibold">Logística Multicategoría</p>
+                <p class="text-sm text-white/80">Bodegas, mayoristas y retail moderno.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Cinta -->
+          <div class="absolute -left-6 bottom-8 rotate-[-8deg]" data-aos="zoom-in-up" data-aos-delay="280">
+            <div class="px-4 py-2 rounded-md font-extrabold title-font"
+                 style="background:linear-gradient(90deg,var(--pink),var(--blue));">
+              PRE-VENTA · NUEVAS RUTAS
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Ola separadora -->
+      <svg class="block w-full -mb-1" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+        <path fill="#0b0b0b" d="M0,64L80,74.7C160,85,320,107,480,117.3C640,128,800,128,960,117.3C1120,107,1280,85,1360,74.7L1440,64L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"/>
+      </svg>
+    </section>
+  </header>
+
+  <!-- MARQUEE -->
+  <div class="marquee bg-[#0b0b0b]">
+    <div class="inner text-white/85">
+      <span class="mx-8 title-font" style="color:var(--lime);">COBERTURA</span>
+      <span class="mx-8"><i class="ri-truck-fill"></i> Distribución</span>
+      <span class="mx-8"><i class="ri-focus-2-fill"></i> Eficiencia</span>
+      <span class="mx-8"><i class="ri-shield-check-fill"></i> Confianza</span>
+      <span class="mx-8"><i class="ri-time-fill"></i> 24/48h</span>
+      <span class="mx-8 title-font" style="color:var(--green);">NACIONAL</span>
+      <!-- loop -->
+      <span class="mx-8 title-font" style="color:var(--lime);">COBERTURA</span>
+      <span class="mx-8"><i class="ri-truck-fill"></i> Distribución</span>
+      <span class="mx-8"><i class="ri-focus-2-fill"></i> Eficiencia</span>
+      <span class="mx-8"><i class="ri-shield-check-fill"></i> Confianza</span>
+      <span class="mx-8"><i class="ri-time-fill"></i> 24/48h</span>
+      <span class="mx-8 title-font" style="color:var(--green);">NACIONAL</span>
+    </div>
+  </div>
+
+  <!-- SERVICIOS (icon grid con micro-animaciones) -->
+  <section id="servicios" class="bg-[#0b0b0b]">
+    <div class="max-w-7xl mx-auto px-6 py-16 md:py-20">
+      <div class="text-center mb-10">
+        <h2 class="title-font stroke text-3xl md:text-4xl" data-aos="fade-up">Servicios de Distribución</h2>
+        <p class="mt-3 text-white/80 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+          Soluciones integrales para que tus productos lleguen más lejos, más rápido y con total control.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Item -->
+        <div class="card wavy rounded-2xl p-6 group" data-aos="zoom-in">
+          <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+               style="background:linear-gradient(135deg,var(--lime),var(--green)); color:#111;">
+            <i class="ri-route-fill text-xl"></i>
+          </div>
+          <h3 class="font-bold text-lg mb-1">Ruteo inteligente</h3>
+          <p class="text-white/80 text-sm">Planificación dinámica para minimizar tiempos y costos.</p>
+        </div>
+
+        <div class="card wavy rounded-2xl p-6 group" data-aos="zoom-in" data-aos-delay="60">
+          <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+               style="background:linear-gradient(135deg,var(--blue),var(--green)); color:#111;">
+            <i class="ri-box-3-fill text-xl"></i>
+          </div>
+          <h3 class="font-bold text-lg mb-1">Picking & Packing</h3>
+          <p class="text-white/80 text-sm">Procesos por categoría, control de lotes y empaques a medida.</p>
+        </div>
+
+        <div class="card wavy rounded-2xl p-6 group" data-aos="zoom-in" data-aos-delay="120">
+          <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+               style="background:linear-gradient(135deg,var(--purple),var(--lime)); color:#111;">
+            <i class="ri-shield-check-fill text-xl"></i>
+          </div>
+          <h3 class="font-bold text-lg mb-1">Trazabilidad</h3>
+          <p class="text-white/80 text-sm">Tracking en tiempo real y reportes operativos.</p>
+        </div>
+
+        <div class="card wavy rounded-2xl p-6 group" data-aos="zoom-in" data-aos-delay="0">
+          <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+               style="background:linear-gradient(135deg,var(--orange),var(--lime)); color:#111;">
+            <i class="ri-exchange-funds-fill text-xl"></i>
+          </div>
+          <h3 class="font-bold text-lg mb-1">Integración ERP</h3>
+          <p class="text-white/80 text-sm">Pedidos, stock y facturación sincronizados.</p>
+        </div>
+
+        <div class="card wavy rounded-2xl p-6 group" data-aos="zoom-in" data-aos-delay="60">
+          <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+               style="background:linear-gradient(135deg,var(--pink),var(--lime)); color:#111;">
+            <i class="ri-time-fill text-xl"></i>
+          </div>
+          <h3 class="font-bold text-lg mb-1">SLA 24/48h</h3>
+          <p class="text-white/80 text-sm">Compromisos de entrega claros y cumplibles.</p>
+        </div>
+
+        <div class="card wavy rounded-2xl p-6 group" data-aos="zoom-in" data-aos-delay="120">
+          <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+               style="background:linear-gradient(135deg,var(--blue),var(--purple)); color:#111;">
+            <i class="ri-team-fill text-xl"></i>
+          </div>
+          <h3 class="font-bold text-lg mb-1">Atención dedicada</h3>
+          <p class="text-white/80 text-sm">Gestor de cuenta y soporte permanente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MÉTRICAS + CTA -->
+  <section class="bg-[#0b0b0b]">
+    <div class="max-w-7xl mx-auto px-6 py-14 md:py-16 grid md:grid-cols-5 gap-8 items-center">
+      <div class="md:col-span-3">
+        <div class="grid grid-cols-3 gap-4">
+          <div class="wavy rounded-2xl p-5 text-center card" data-aos="zoom-in">
+            <p class="text-3xl font-extrabold title-font" style="color:var(--lime);" data-countup="48">48h</p>
+            <p class="text-sm text-white/80">Tiempo de entrega</p>
+          </div>
+          <div class="wavy rounded-2xl p-5 text-center card" data-aos="zoom-in" data-aos-delay="80">
+            <p class="text-3xl font-extrabold title-font" style="color:var(--green);" data-countup="99.2">99.2%</p>
+            <p class="text-sm text-white/80">Órdenes a tiempo</p>
+          </div>
+          <div class="wavy rounded-2xl p-5 text-center card" data-aos="zoom-in" data-aos-delay="120">
+            <p class="text-3xl font-extrabold title-font" style="color:var(--blue);" data-countup="120">+120</p>
+            <p class="text-sm text-white/80">Rutas activas</p>
+          </div>
+        </div>
+      </div>
+      <div class="md:col-span-2" data-aos="fade-left">
+        <h3 class="font-bold text-2xl">Listo para mover más volumen</h3>
+        <p class="text-white/80 mt-2">Agenda una llamada y en 48h te presentamos una propuesta con ruteo y costos.</p>
+        <a href="#contacto" class="mt-4 inline-flex btn-glow rounded-2xl px-5 py-3 font-extrabold title-font"
+           style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">
+          Solicitar propuesta <i class="ri-arrow-right-up-line ml-1"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORÍAS V2 (mosaico + carrusel) -->
+  <section id="categorias" class="bg-[#0a0a0a]">
+    <div class="max-w-7xl mx-auto px-6 py-16">
+      <div class="text-center mb-10">
+        <h2 class="title-font stroke text-3xl md:text-4xl" data-aos="fade-up">Categorías</h2>
+        <p class="mt-3 text-white/80 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+          Integramos tus líneas en una sola operación: menos fricción, más alcance.
+        </p>
+      </div>
+
+      <!-- Grid -->
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="aspect-[5/3] wavy rounded-2xl card flex items-end p-4" data-aos="zoom-in">
+          <span class="title-font text-xl" style="color:var(--lime);">Bebidas</span>
+        </div>
+        <div class="aspect-[5/3] wavy rounded-2xl card flex items-end p-4" data-aos="zoom-in" data-aos-delay="60">
+          <span class="title-font text-xl" style="color:var(--green);">Snacks</span>
+        </div>
+        <div class="aspect-[5/3] wavy rounded-2xl card flex items-end p-4" data-aos="zoom-in" data-aos-delay="120">
+          <span class="title-font text-xl" style="color:var(--blue);">Limpieza</span>
+        </div>
+      </div>
+
+      <!-- Carrusel horizontal móvil/desktop -->
+      <div class="flex gap-4 overflow-x-auto snap-x pb-2" data-aos="fade-up">
+        <div class="min-w-[240px] snap card rounded-2xl p-4 flex flex-col justify-end aspect-[4/3]">
+          <span class="title-font text-lg" style="color:var(--purple);">Cuidado Personal</span>
+        </div>
+        <div class="min-w-[240px] snap card rounded-2xl p-4 flex flex-col justify-end aspect-[4/3]">
+          <span class="title-font text-lg" style="color:var(--orange);">Hogar</span>
+        </div>
+        <div class="min-w-[240px] snap card rounded-2xl p-4 flex flex-col justify-end aspect-[4/3]">
+          <span class="title-font text-lg" style="color:var(--pink);">Mascotas</span>
+        </div>
+        <div class="min-w-[240px] snap card rounded-2xl p-4 flex flex-col justify-end aspect-[4/3]">
+          <span class="title-font text-lg" style="color:var(--lime);">Abarrotes</span>
+        </div>
+        <div class="min-w-[240px] snap card rounded-2xl p-4 flex flex-col justify-end aspect-[4/3]">
+          <span class="title-font text-lg" style="color:var(--green);">Frescos</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESO -->
+  <section id="proceso" class="bg-[#0b0b0b]">
+    <div class="max-w-7xl mx-auto px-6 py-16 md:py-20">
+      <div class="text-center mb-10">
+        <h2 class="title-font stroke text-3xl md:text-4xl" data-aos="fade-up">¿Cómo trabajamos?</h2>
+        <p class="mt-3 text-white/80 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+          Un flujo claro para que tu operación avance sin fricciones.
+        </p>
+      </div>
+
+      <div class="relative grid md:grid-cols-4 gap-6">
+        <div class="hidden md:block absolute left-0 right-0 top-8 h-1 rounded-full"
+             style="background:linear-gradient(90deg, var(--green), var(--lime), var(--blue)); opacity:.35;"></div>
+
+        <div class="card rounded-2xl p-6 relative" data-aos="fade-up">
+          <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+               style="background:linear-gradient(135deg,var(--green),var(--lime)); color:#111;">1</div>
+          <h3 class="font-bold mb-1">Brief & Diagnóstico</h3>
+          <p class="text-white/80 text-sm">Volumen, zonas, categorías y SLAs requeridos.</p>
+        </div>
+
+        <div class="card rounded-2xl p-6 relative" data-aos="fade-up" data-aos-delay="60">
+          <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+               style="background:linear-gradient(135deg,var(--blue),var(--green)); color:#111;">2</div>
+          <h3 class="font-bold mb-1">Propuesta & Rutas</h3>
+          <p class="text-white/80 text-sm">Costeo, ruteo y ventanas de entrega.</p>
+        </div>
+
+        <div class="card rounded-2xl p-6 relative" data-aos="fade-up" data-aos-delay="120">
+          <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+               style="background:linear-gradient(135deg,var(--purple),var(--lime)); color:#111;">3</div>
+          <h3 class="font-bold mb-1">Integración & Piloto</h3>
+          <p class="text-white/80 text-sm">Conexión con ERP/marketplace y prueba controlada.</p>
+        </div>
+
+        <div class="card rounded-2xl p-6 relative" data-aos="fade-up" data-aos-delay="180">
+          <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+               style="background:linear-gradient(135deg,var(--orange),var(--green)); color:#111;">4</div>
+          <h3 class="font-bold mb-1">Despliegue & Escala</h3>
+          <p class="text-white/80 text-sm">Monitoreo, KPIs y mejora continua.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIOS V2 (tarjetas + banda deslizante) -->
+  <section id="clientes" class="bg-[#0a0a0a]">
+    <div class="max-w-7xl mx-auto px-6 py-16">
+      <div class="text-center mb-10">
+        <h2 class="title-font stroke text-3xl md:text-4xl" data-aos="fade-up">Lo que dicen nuestros clientes</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-6">
+        <figure class="card rounded-2xl p-6 grad-border" data-aos="fade-up">
+          <div class="flex items-center gap-2 text-[var(--lime)] mb-2">
+            <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i>
+          </div>
+          <blockquote class="text-white/90">“Bajamos costos en 18% manteniendo tiempos gracias a su ruteo.”</blockquote>
+          <figcaption class="mt-3 text-white/60 text-sm">María G. — Retail Lima</figcaption>
+        </figure>
+        <figure class="card rounded-2xl p-6 grad-border" data-aos="fade-up" data-aos-delay="80">
+          <div class="flex items-center gap-2 text-[var(--green)] mb-2">
+            <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-half-line"></i>
+          </div>
+          <blockquote class="text-white/90">“Integración con nuestro ERP rápida y estable.”</blockquote>
+          <figcaption class="mt-3 text-white/60 text-sm">Carlos R. — Mayorista</figcaption>
+        </figure>
+        <figure class="card rounded-2xl p-6 grad-border" data-aos="fade-up" data-aos-delay="140">
+          <div class="flex items-center gap-2 text-[var(--blue)] mb-2">
+            <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i>
+          </div>
+          <blockquote class="text-white/90">“Tracking claro y soporte que responde.”</blockquote>
+          <figcaption class="mt-3 text-white/60 text-sm">Ana P. — B2B Bebidas</figcaption>
+        </figure>
+      </div>
+
+      <!-- Banda de logos/claims -->
+      <div class="marquee bg-[#0b0b0b] rounded-xl" data-aos="zoom-in">
+        <div class="inner text-white/80">
+          <span class="mx-8"><i class="ri-shake-hands-fill"></i> +60 Clientes</span>
+          <span class="mx-8"><i class="ri-community-fill"></i> +300 Tiendas</span>
+          <span class="mx-8"><i class="ri-map-pin-2-fill"></i> 8 Ciudades</span>
+          <span class="mx-8"><i class="ri-bar-chart-2-fill"></i> KPIs en tiempo real</span>
+          <span class="mx-8"><i class="ri-customer-service-2-fill"></i> Soporte dedicado</span>
+
+          <span class="mx-8"><i class="ri-shake-hands-fill"></i> +60 Clientes</span>
+          <span class="mx-8"><i class="ri-community-fill"></i> +300 Tiendas</span>
+          <span class="mx-8"><i class="ri-map-pin-2-fill"></i> 8 Ciudades</span>
+          <span class="mx-8"><i class="ri-bar-chart-2-fill"></i> KPIs en tiempo real</span>
+          <span class="mx-8"><i class="ri-customer-service-2-fill"></i> Soporte dedicado</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto" class="bg-[#0b0b0b]">
+    <div class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-start">
+      <div data-aos="fade-right">
+        <h2 class="title-font stroke text-3xl">¿Listo para distribuir más?</h2>
+        <p class="mt-3 text-white/85">Cuéntanos tu volumen, zonas y categorías. Te preparamos una propuesta con rutas y SLAs.</p>
+        <ul class="mt-5 space-y-2 text-white/85">
+          <li>✅ Picking y packing por categoría</li>
+          <li>✅ Integración a ERP/Marketplace</li>
+          <li>✅ Indicadores en tiempo real</li>
+        </ul>
+      </div>
+
+      <form class="grid gap-3 card rounded-2xl p-5 grad-border" data-aos="fade-left">
+        <div class="grid sm:grid-cols-2 gap-3">
+          <input class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30" placeholder="Nombre"/>
+          <input class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30" placeholder="Empresa"/>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <input type="email" class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30" placeholder="Correo"/>
+          <input class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30" placeholder="Teléfono"/>
+        </div>
+        <textarea rows="4" class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30" placeholder="Cuéntanos sobre tus necesidades de distribución"></textarea>
+        <button class="justify-self-start btn-glow rounded-2xl px-6 py-3 font-extrabold title-font"
+                style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">
+          Enviar solicitud
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER V2 -->
+  <footer class="footer-grad text-white border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-8">
+      <div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="h-10 w-10 rounded-full sticker"></div>
+          <span class="title-font text-lg" style="color:var(--blue); text-shadow:-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111,1px 1px 0 #111;">Distribuidora</span>
+        </div>
+        <p class="text-white/80 text-sm">Impulsamos la distribución de tus productos con eficiencia y confianza.</p>
+      </div>
+      <div>
+        <h4 class="font-bold mb-3">Links</h4>
+        <ul class="space-y-2 text-white/80 text-sm">
+          <li><a href="#servicios" class="hover:text-white">Servicios</a></li>
+          <li><a href="#categorias" class="hover:text-white">Categorías</a></li>
+          <li><a href="#proceso" class="hover:text-white">Proceso</a></li>
+          <li><a href="#clientes" class="hover:text-white">Testimonios</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-3">Contacto</h4>
+        <ul class="space-y-2 text-white/80 text-sm">
+          <li><i class="ri-mail-line mr-1"></i> contacto@distribuidora.pe</li>
+          <li><i class="ri-phone-fill mr-1"></i> +51 900 000 000</li>
+          <li><i class="ri-map-pin-2-line mr-1"></i> Lima, Perú</li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-3">Suscripción</h4>
+        <div class="flex gap-2">
+          <input class="flex-1 rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30 text-sm" placeholder="Tu correo"/>
+          <button class="rounded-xl px-4 py-3 font-bold" style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">Unirme</button>
+        </div>
+        <div class="flex gap-3 mt-3">
+          <a href="#" class="h-9 w-9 flex items-center justify-center rounded-full border border-white/15 hover:border-white/30"><i class="ri-whatsapp-line"></i></a>
+          <a href="#" class="h-9 w-9 flex items-center justify-center rounded-full border border-white/15 hover:border-white/30"><i class="ri-instagram-line"></i></a>
+          <a href="#" class="h-9 w-9 flex items-center justify-center rounded-full border border-white/15 hover:border-white/30"><i class="ri-linkedin-line"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/10 py-5 text-center text-white/60 text-sm">
+      © <span id="year"></span> Distribuidora — Todos los derechos reservados.
+    </div>
+  </footer>
+
+  <!-- AOS + helpers -->
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    AOS.init({ once:true, offset:80, duration:750, easing:'ease-out-cubic' });
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Countup simple para métricas (solo visual)
+    document.querySelectorAll('[data-countup]').forEach(el=>{
+      const val = el.getAttribute('data-countup');
+      if(!/^\d+(\.\d+)?$/.test(val)) return;
+      let cur = 0, end = parseFloat(val), step = Math.max(1, end/60);
+      const t = setInterval(()=>{
+        cur = Math.min(end, cur + step);
+        el.textContent = el.textContent.includes('%') ? cur.toFixed(1)+'%' : (el.textContent.includes('h') ? Math.round(cur)+'h' : Math.round(cur));
+        if(cur >= end) clearInterval(t);
+      }, 18);
+    });
+  </script>
+</body>
+</html>

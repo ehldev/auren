@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Distribuidora · Wipe + Cursor (Chicha)</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bungee:wght@400&family=Inter:wght@400;600;800;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- AOS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+
+    <!-- Remix Icons (opcional) -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            /* Paleta chicha */
+            --pink: #FF2FB9;
+            --lime: #C8FF00;
+            --green: #39FF14;
+            --blue: #00E5FF;
+            --purple: #7A00FF;
+            --orange: #FF7A00;
+            --ink: #0b0b0b;
+            --bg1: #0a0a0a;
+            --bg2: #101010;
+            --bg3: #151515;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* respetar accesibilidad */
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+        }
+
+        .title-font {
+            font-family: "Bungee", system-ui, sans-serif;
+        }
+
+        .body-font {
+            font-family: "Inter", ui-sans-serif, system-ui, -apple-system;
+        }
+
+        /* ===== Cursor personalizado ===== */
+        body {
+            cursor: none;
+        }
+
+        .cursor,
+        .cursor-halo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 10000;
+            will-change: transform;
+            mix-blend-mode: difference;
+        }
+
+        .cursor {
+            width: 12px;
+            height: 12px;
+            border-radius: 9999px;
+            background: #fff;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-halo {
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            border: 2px solid #fff3;
+            transform: translate(-50%, -50%);
+            transition: transform .15s ease, border-color .2s ease, width .15s ease, height .15s ease;
+        }
+
+        .cursor--link .cursor-halo {
+            width: 72px;
+            height: 72px;
+            border-color: #fff9;
+        }
+
+        /* ===== Fondo mesh por panel ===== */
+        .mesh-1 {
+            background:
+                radial-gradient(1000px 600px at 10% 15%, rgba(200, 255, 0, .16), transparent 60%),
+                radial-gradient(900px 500px at 90% 12%, rgba(122, 0, 255, .20), transparent 60%),
+                radial-gradient(1200px 700px at 50% 95%, rgba(0, 229, 255, .12), transparent 60%),
+                linear-gradient(180deg, var(--bg1), var(--bg2));
+        }
+
+        .mesh-2 {
+            background:
+                radial-gradient(800px 520px at 85% 15%, rgba(255, 47, 185, .18), transparent 60%),
+                radial-gradient(900px 540px at 10% 88%, rgba(57, 255, 20, .16), transparent 60%),
+                linear-gradient(180deg, #0b0b0b, #0f0f0f);
+        }
+
+        .mesh-3 {
+            background:
+                radial-gradient(900px 560px at 30% 10%, rgba(0, 229, 255, .18), transparent 60%),
+                radial-gradient(900px 560px at 70% 90%, rgba(255, 122, 0, .14), transparent 60%),
+                linear-gradient(180deg, #0b0b0b, #101010);
+        }
+
+        /* Parallax simple */
+        .mesh-fixed {
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Fallback iOS */
+        @supports (-webkit-touch-callout: none) {
+            .mesh-fixed {
+                background-attachment: scroll;
+            }
+        }
+
+        /* ===== FULL WIPE =====
+       Cada .panel lleva un ::before que actúa como cortina.
+       Al entrar al viewport (IntersectionObserver) se agrega .is-visible. */
+        .panel {
+            position: relative;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(100deg, var(--lime), var(--green), var(--blue));
+            transform: translateX(0);
+            transition: transform .9s cubic-bezier(.77, 0, .18, 1);
+        }
+
+        .panel.is-visible::before {
+            transform: translateX(110%);
+        }
+
+        /* Alternar dirección (panel con .reverse va de derecha<-izquierda) */
+        .panel.reverse::before {
+            transform: translateX(0);
+        }
+
+        .panel.reverse.is-visible::before {
+            transform: translateX(-110%);
+        }
+
+        /* micro-wipe en bloques internos */
+        .wipe {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wipe::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(100deg, var(--pink), var(--purple));
+            transform: translateX(-102%);
+            transition: transform .9s cubic-bezier(.77, 0, .18, 1) .1s;
+            opacity: .85;
+        }
+
+        .panel.is-visible .wipe::after {
+            transform: translateX(102%);
+        }
+
+        /* Alterno el micro-wipe cuando el panel es .reverse */
+        .panel.reverse .wipe::after {
+            transform: translateX(102%);
+        }
+
+        .panel.reverse.is-visible .wipe::after {
+            transform: translateX(-102%);
+        }
+
+        /* ===== Botón con glow ===== */
+        .btn-glow {
+            box-shadow: 0 0 0 0 rgba(57, 255, 20, .9);
+            animation: pulseGlow 2.6s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(57, 255, 20, .8);
+            }
+
+            70% {
+                box-shadow: 0 0 34px 14px rgba(57, 255, 20, .12);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(57, 255, 20, 0);
+            }
+        }
+
+        /* ===== Chips / Cards ===== */
+        .chip {
+            border: 2px dashed rgba(255, 255, 255, .25);
+            background: rgba(255, 255, 255, .06);
+            backdrop-filter: blur(6px);
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 18px;
+        }
+
+        /* ===== Scroll-snap de página completa ===== */
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            scroll-snap-type: y mandatory;
+        }
+
+        section.panel {
+            scroll-snap-align: start;
+        }
+
+        /* ===== Navegación de puntos ===== */
+        .dots {
+            position: fixed;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 9999px;
+            background: #ffffff42;
+            transition: all .2s;
+        }
+
+        .dot.active {
+            background: #fff;
+            box-shadow: 0 0 0 4px #ffffff25;
+        }
+
+        /* ===== Titulares contorneados ===== */
+        .stroke {
+            color: var(--lime);
+            text-shadow:
+                -2px -2px 0 var(--ink), 2px -2px 0 var(--ink),
+                -2px 2px 0 var(--ink), 2px 2px 0 var(--ink),
+                0 0 26px rgba(200, 255, 0, .35);
+        }
+
+        /* ===== Footer ===== */
+        .footer-grad {
+            background:
+                radial-gradient(800px 400px at 20% -10%, rgba(200, 255, 0, .15), transparent 60%),
+                linear-gradient(180deg, #0B0B0B, #0A0A0A 60%);
+        }
+
+        /* Accesibilidad: mostrar cursor nativo en inputs/textarea */
+        input,
+        textarea,
+        button {
+            cursor: auto;
+        }
+
+        /* --- Cat Cards --- */
+        #cats-grid .cat-card {
+            position: relative;
+            border-radius: 20px;
+            padding: 20px 18px 14px;
+            display: grid;
+            align-content: space-between;
+            min-height: 130px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+            border: 1px solid rgba(255, 255, 255, .12);
+            overflow: hidden;
+            transform: translateZ(0);
+            will-change: transform, box-shadow;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+
+        #cats-grid .cat-card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 22px;
+            z-index: 0;
+            background: conic-gradient(from 0deg, var(--lime), var(--green), var(--blue), var(--purple), var(--pink), var(--orange), var(--lime));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            padding: 1px;
+            opacity: .35;
+            transition: opacity .25s ease;
+        }
+
+        #cats-grid .cat-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            z-index: 0;
+            background: radial-gradient(500px 180px at 50% 0%, rgba(255, 255, 255, .06), transparent 60%);
+            pointer-events: none;
+        }
+
+        #cats-grid .badge {
+            z-index: 1;
+            justify-self: start;
+            font-size: 10px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            border: 2px dashed rgba(255, 255, 255, .25);
+            background: rgba(255, 255, 255, .06);
+            backdrop-filter: blur(6px);
+            padding: 4px 8px;
+            border-radius: 9999px;
+        }
+
+        #cats-grid .cat-card h3 {
+            z-index: 1;
+            align-self: end;
+            font-family: "Bungee", system-ui, sans-serif;
+            font-size: clamp(18px, 1.3vw + 10px, 22px);
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            text-shadow: -2px -2px 0 var(--ink), 2px -2px 0 var(--ink), -2px 2px 0 var(--ink), 2px 2px 0 var(--ink);
+        }
+
+        #cats-grid .cat-card small {
+            z-index: 1;
+            opacity: .65;
+        }
+
+        #cats-grid .cat-card:hover {
+            transform: translateY(-3px) rotate(.4deg);
+            box-shadow: 0 14px 36px rgba(0, 0, 0, .35), 0 0 30px rgba(200, 255, 0, .10);
+        }
+
+        #cats-grid .cat-card:hover::before {
+            opacity: .85;
+        }
+
+        /* color por data-attr (solo texto, se mantiene sin imágenes) */
+        #cats-grid .cat-card[data-color="lime"] h3 {
+            color: var(--lime);
+        }
+
+        #cats-grid .cat-card[data-color="green"] h3 {
+            color: var(--green);
+        }
+
+        #cats-grid .cat-card[data-color="blue"] h3 {
+            color: var(--blue);
+        }
+
+        #cats-grid .cat-card[data-color="purple"] h3 {
+            color: var(--purple);
+        }
+
+        #cats-grid .cat-card[data-color="orange"] h3 {
+            color: var(--orange);
+        }
+
+        #cats-grid .cat-card[data-color="pink"] h3 {
+            color: var(--pink);
+        }
+
+        /* fallback si AOS no carga */
+        @keyframes catPop {
+            0% {
+                transform: translateY(14px) scale(.96);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .no-aos #cats-grid .cat-card {
+            animation: catPop .5s both;
+        }
+
+        .has-aos #cats-grid .cat-card {
+            animation: none !important;
+        }
+
+        /* cuando AOS está activo, no usamos fallback */
+
+        /* Marquee */
+        .marquee {
+            overflow: hidden;
+            white-space: nowrap;
+            border-block: 1px dashed rgba(255, 255, 255, .18);
+        }
+
+        .marquee .inner {
+            display: inline-block;
+            padding-block: 10px;
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* centrar y reset de la lista */
+        .cats-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            /* ⬅️ centrado horizontal */
+            align-content: center;
+            /* ⬅️ centra cuando hay varias filas */
+            padding-left: 0;
+            list-style: none;
+        }
+
+        /* sombras y glow mejorados */
+        .badge {
+            /* sombras: base + inner + halo */
+            box-shadow:
+                0 18px 36px rgba(0, 0, 0, .42),
+                /* sombra base más profunda */
+                0 2px 0 rgba(0, 0, 0, .35) inset,
+                /* línea inferior interior (relieve) */
+                0 0 0 2px rgba(255, 255, 255, .06) inset,
+                /* leve borde interior */
+                0 0 34px rgba(200, 255, 0, .12);
+            /* halo “chicha” */
+            filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .25));
+            /* sombra fuera del box-shadow */
+        }
+
+        /* al pasar el mouse: sube y brilla un poco más */
+        .badge:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 22px 44px rgba(0, 0, 0, .5),
+                0 2px 0 rgba(0, 0, 0, .35) inset,
+                0 0 0 2px rgba(255, 255, 255, .08) inset,
+                0 0 40px rgba(200, 255, 0, .18);
+            filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .3));
+        }
+
+        /* foco accesible consistente con el estilo */
+        .badge:focus-visible {
+            box-shadow:
+                0 0 0 3px rgba(0, 0, 0, .65),
+                0 0 0 6px #C8FF00,
+                0 18px 36px rgba(0, 0, 0, .42);
+        }
+
+        /* ===== Badges de categorías (estilo chicha) ===== */
+
+        /* contenedor flexible: se ajusta y envuelve */
+        .cats-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* badge base: caja ajustada al texto */
+        .badge {
+            --g: linear-gradient(135deg, #222, #171717);
+            /* fallback */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, .6vw + 6px, 12px) clamp(14px, 1.1vw + 10px, 22px);
+            border-radius: 18px;
+            background: var(--g);
+            border: 1px solid rgba(255, 255, 255, .14);
+            box-shadow:
+                0 10px 22px rgba(0, 0, 0, .35),
+                0 0 0 2px rgba(255, 255, 255, .06) inset,
+                0 0 26px rgba(200, 255, 0, .10);
+            position: relative;
+            isolation: isolate;
+            outline: none;
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+            white-space: nowrap;
+            /* que se mantenga compacto */
+        }
+
+        /* brillo/relieve interior y aro neón sutil */
+        .badge::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            z-index: 0;
+            background: radial-gradient(180px 90px at 20% 15%, rgba(255, 255, 255, .22), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: .35;
+            pointer-events: none;
+        }
+
+        .badge::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            z-index: -1;
+            background: conic-gradient(from 0deg, #C8FF00, #39FF14, #00E5FF, #7A00FF, #FF2FB9, #FF7A00, #C8FF00);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: .25;
+        }
+
+        /* hover/focus accesibles */
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 14px 28px rgba(0, 0, 0, .45),
+                0 0 0 2px rgba(255, 255, 255, .08) inset,
+                0 0 36px rgba(200, 255, 0, .16);
+            filter: saturate(1.06);
+        }
+
+        .badge:focus-visible {
+            box-shadow:
+                0 0 0 3px rgba(0, 0, 0, .6),
+                0 0 0 6px #C8FF00;
+        }
+
+        /* tipografía afiche: fuerte, itálica, con contorno para legibilidad */
+        .badge {
+            font-family: "Bungee", system-ui, sans-serif;
+            /* font-style: italic; */
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            font-size: clamp(14px, .9vw + 10px, 20px);
+            color: #fff;
+            /* text-shadow:
+                -2px -2px 0 #0b0b0b, 2px -2px 0 #0b0b0b,
+                -2px 2px 0 #0b0b0b, 2px 2px 0 #0b0b0b; */
+        }
+
+        /* ===== Paleta de degradados chicha (badges) ===== */
+
+        /* Lima ácido → verde neón → aqua */
+        .badge--lime {
+            --g: linear-gradient(135deg, #D7FF00 0%, #6BFF00 48%, #00FFA8 100%);
+            color: #0b0b0b;
+            /* sobre fondos claros el texto oscuro lee mejor */
+            text-shadow:
+                -1px -1px 0 #dff, 1px -1px 0 #dff,
+                -1px 1px 0 #dff, 1px 1px 0 #dff;
+            /* contorno claro sutil */
+        }
+
+        /* Verde → turquesa → celeste */
+        .badge--green {
+            --g: linear-gradient(135deg, #00FF85 0%, #00E5FF 52%, #00B2FF 100%);
+        }
+
+        /* Cian → azul → morado */
+        .badge--blue {
+            --g: linear-gradient(135deg, #00E1FF 0%, #2F8CFF 52%, #7B00FF 100%);
+        }
+
+        /* Fucsia → violeta → magenta */
+        .badge--purple {
+            --g: linear-gradient(135deg, #FF00E6 0%, #B800FF 52%, #FF2FCC 100%);
+        }
+
+        /* Amarillo cartel → naranja → coral */
+        .badge--orange {
+            --g: linear-gradient(135deg, #FFF200 0%, #FFB100 46%, #FF6A2A 100%);
+            color: #0b0b0b;
+            text-shadow:
+                -1px -1px 0 #ffd, 1px -1px 0 #ffd,
+                -1px 1px 0 #ffd, 1px 1px 0 #ffd;
+        }
+
+        /* Rosa neón → magenta → naranja pop */
+        .badge--pink {
+            --g: linear-gradient(135deg, #FF79F2 0%, #FF2FB9 52%, #FF7A00 100%);
+        }
+
+        /* ===== Ajuste de sombras chicha (más sutil) + texto siempre blanco ===== */
+
+        /* base: sombras más contenidas */
+        .badge {
+            /* halo por defecto (suave) */
+            --halo: rgba(200, 255, 0, .22);
+            --halo-outer: rgba(200, 255, 0, .10);
+
+            box-shadow:
+                0 10px 18px rgba(0, 0, 0, .45),
+                /* menos profunda */
+                0 2px 0 rgba(0, 0, 0, .28) inset,
+                /* relieve interior más leve */
+                0 0 0 2px rgba(255, 255, 255, .05) inset,
+                0 0 16px 4px var(--halo),
+                /* halo cercano reducido */
+                0 0 40px 10px var(--halo-outer);
+            /* halo lejano reducido */
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .25));
+        }
+
+        /* halo externo más pequeño y con menos blur */
+        .badge::before {
+            inset: -6px;
+            background: radial-gradient(55% 70% at 50% 60%, var(--halo-outer) 0%, transparent 70%);
+            filter: blur(10px);
+        }
+
+        /* brillo interior más discreto */
+        .badge::after {
+            opacity: .25;
+        }
+
+        /* hover con un “toque” sin encandilar */
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 14px 24px rgba(0, 0, 0, .48),
+                0 2px 0 rgba(0, 0, 0, .28) inset,
+                0 0 0 2px rgba(255, 255, 255, .06) inset,
+                0 0 20px 6px var(--halo),
+                0 0 55px 14px var(--halo-outer);
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, .3));
+        }
+
+        /* foco accesible, menos intenso */
+        .badge:focus-visible {
+            box-shadow:
+                0 0 0 2px rgba(0, 0, 0, .6),
+                0 0 0 5px var(--halo),
+                0 10px 18px rgba(0, 0, 0, .45);
+        }
+
+        /* ===== Texto: siempre blanco con contorno para legibilidad ===== */
+        .badge {
+            color: #fff !important;
+            /* fuerza blanco en todas las variantes */
+            text-shadow:
+                -2px -2px 0 #0b0b0b, 2px -2px 0 #0b0b0b,
+                -2px 2px 0 #0b0b0b, 2px 2px 0 #0b0b0b;
+        }
+
+        /* ===== Halos por color (suaves) ===== */
+        .badge--lime {
+            --halo: rgba(200, 255, 0, .20);
+            --halo-outer: rgba(200, 255, 0, .10);
+        }
+
+        .badge--green {
+            --halo: rgba(0, 255, 165, .20);
+            --halo-outer: rgba(0, 255, 165, .10);
+        }
+
+        .badge--blue {
+            --halo: rgba(0, 229, 255, .22);
+            --halo-outer: rgba(0, 229, 255, .11);
+        }
+
+        .badge--purple {
+            --halo: rgba(183, 0, 255, .22);
+            --halo-outer: rgba(183, 0, 255, .11);
+        }
+
+        .badge--orange {
+            --halo: rgba(255, 170, 30, .22);
+            --halo-outer: rgba(255, 170, 30, .10);
+        }
+
+        .badge--pink {
+            --halo: rgba(255, 47, 185, .22);
+            --halo-outer: rgba(255, 47, 185, .10);
+        }
+
+        .badge-gradient {
+            background: linear-gradient(90deg, #FF7AF0 0%, #FF2FB9 45%, #FF7A00 100%);
+        }
+
+        /* === Animaciones de entrada (stagger con --d) === */
+        .reveal-up,
+        .reveal-right,
+        .reveal-left {
+            opacity: 0;
+            transform: translateY(14px);
+            filter: blur(6px);
+            transition:
+                opacity .7s cubic-bezier(.22, .61, .36, 1),
+                transform .7s cubic-bezier(.22, .61, .36, 1),
+                filter .7s cubic-bezier(.22, .61, .36, 1);
+            transition-delay: var(--d, 0ms);
+            will-change: transform, opacity, filter;
+        }
+
+        /* variantes */
+        .reveal-right {
+            transform: translateX(20px);
+        }
+
+        .reveal-left {
+            transform: translateX(-20px);
+        }
+
+        /* estado visible */
+        .is-inview {
+            opacity: 1;
+            transform: none;
+            filter: blur(0);
+        }
+
+        /* badge flotante (ya lo usabas) */
+        @keyframes floatY {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-6px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .float-y {
+            animation: floatY 2.8s ease-in-out infinite;
+        }
+
+        /* Cinta superior con degradado chicha */
+        .footer-ribbon {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            background: linear-gradient(90deg, #1a1a1a 0%, #0f0f0f 40%, #0b0b0b 100%),
+                radial-gradient(600px 140px at 20% 0%, rgba(200, 255, 0, .14), transparent 60%),
+                radial-gradient(600px 140px at 80% 0%, rgba(255, 47, 185, .12), transparent 60%);
+        }
+
+        .footer-ribbon .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background: var(--lime);
+            box-shadow: 0 0 12px rgba(200, 255, 0, .6);
+        }
+
+        /* Logo con aro neón */
+        .footer-logo {
+            background: conic-gradient(from 0deg, var(--pink), var(--orange), var(--lime), var(--green), var(--blue), var(--purple), var(--pink));
+            box-shadow: 0 10px 22px rgba(0, 0, 0, .35), 0 0 18px rgba(200, 255, 0, .12) inset;
+            border: 4px solid #111;
+        }
+
+        .footer-logo-text {
+            text-shadow: -1px -1px 0 #111, 1px -1px 0 #111, -1px 1px 0 #111, 1px 1px 0 #111;
+        }
+
+        /* Chips del primer bloque */
+        .tag-badge {
+            font-size: 12px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            border: 1px dashed rgba(255, 255, 255, .25);
+            background: rgba(255, 255, 255, .06);
+            backdrop-filter: blur(6px);
+            padding: 6px 10px;
+            border-radius: 9999px;
+        }
+
+        /* Lista con “balines” chicha */
+        .list-dot li {
+            position: relative;
+            padding-left: 18px;
+        }
+
+        .list-dot li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: .55em;
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, var(--lime), var(--green));
+            box-shadow: 0 0 10px rgba(200, 255, 0, .55);
+        }
+
+        /* Botones sociales con aro y glow */
+        .social-btn {
+            height: 38px;
+            width: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, .08), transparent 60%);
+            box-shadow:
+                0 10px 18px rgba(0, 0, 0, .35),
+                0 0 14px rgba(0, 229, 255, .15);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 14px 24px rgba(0, 0, 0, .45),
+                0 0 20px rgba(0, 229, 255, .25);
+        }
+
+        .border-chicha-pink {
+            border-color: var(--pink);
+        }
+
+        .border-chicha-lime {
+            border-color: var(--lime);
+        }
+
+        .border-chicha-green {
+            border-color: var(--green);
+        }
+
+        .border-chicha-blue {
+            border-color: var(--blue);
+        }
+
+        .text-chicha-pink {
+            color: var(--pink);
+        }
+
+        .text-chicha-lime {
+            color: var(--lime);
+        }
+
+        .text-chicha-green {
+            color: var(--green);
+        }
+
+        .text-chicha-blue {
+            color: var(--blue);
+        }
+
+        .text-chicha-purple {
+            color: var(--purple);
+        }
+
+        .text-chicha-orange {
+            color: var(--orange);
+        }
+
+        .mobile-link {
+            padding: .75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: .75rem;
+            background: rgba(255, 255, 255, .04);
+            transition: border-color .15s ease, background .15s ease, transform .15s ease;
+        }
+
+        .mobile-link:hover {
+            border-color: rgba(255, 255, 255, .25);
+            background: rgba(255, 255, 255, .06);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body class="body-font text-white bg-[#0a0a0a] selection:bg-lime-300 selection:text-black">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 inset-x-0 z-50 bg-[#0b0b0bcc] backdrop-blur-md border-b border-white/10">
+        <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="#hero" class="flex items-center gap-3">
+                <img src="https://www.auren.com.pe/images/logo_grupoauren.png" alt="Grupo Auren"
+                    class="w-[120px] h-auto">
+            </a>
+
+            <!-- Desktop -->
+            <div class="hidden md:flex items-center gap-5 text-sm">
+                <a href="#hero" class="opacity-85 hover:opacity-100 transition linkish">Inicio</a>
+                <a href="#servicios" class="opacity-85 hover:opacity-100 transition linkish">Servicios</a>
+                <a href="#categorias" class="opacity-85 hover:opacity-100 transition linkish">Categorías</a>
+                <a href="#proceso" class="opacity-85 hover:opacity-100 transition linkish">Proceso</a>
+                <a href="#clientes" class="opacity-85 hover:opacity-100 transition linkish">Testimonios</a>
+                <a href="#contacto" class="opacity-85 hover:opacity-100 transition linkish">Contacto</a>
+                <a href="#contacto"
+                    class="ml-2 inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold btn-glow"
+                    style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">
+                    Cotizar ahora <i class="ri-flashlight-fill text-base"></i>
+                </a>
+            </div>
+
+            <!-- Toggle -->
+            <button id="navToggle" type="button" aria-controls="mobileMenu" aria-expanded="false"
+                class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg border border-white/15 focus:outline-none focus:ring-2 focus:ring-white/30">
+                <i id="navToggleIcon" class="ri-menu-3-line text-xl"></i>
+                <span class="sr-only">Abrir menú</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- MOBILE OVERLAY (fixed, fuera del flujo) -->
+    <div id="mobileMenu"
+        class="fixed inset-0 z-[60] md:hidden opacity-0 -translate-y-2 pointer-events-none transition-all duration-200">
+        <!-- Backdrop -->
+        <button id="backdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></button>
+
+        <!-- Sheet (panel) -->
+        <div class="absolute left-0 right-0 top-0 pt-16"> <!-- pt-16 para no tapar el header (h-16) -->
+            <div class="border-b border-white/10 bg-[#0b0b0f]/95">
+                <div class="max-w-7xl mx-auto px-6 py-4">
+                    <nav class="flex flex-col gap-2 text-sm">
+                        <a href="#hero" class="mobile-link">Inicio</a>
+                        <a href="#servicios" class="mobile-link">Servicios</a>
+                        <a href="#categorias" class="mobile-link">Categorías</a>
+                        <a href="#proceso" class="mobile-link">Proceso</a>
+                        <a href="#clientes" class="mobile-link">Testimonios</a>
+                        <a href="#contacto" class="mobile-link">Contacto</a>
+                        <a href="#contacto"
+                            class="mt-2 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 font-extrabold title-font"
+                            style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">
+                            Cotizar ahora <i class="ri-flashlight-fill text-base"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-halo"></div>
+
+    <!-- Dots nav -->
+    <div class="dots" aria-hidden="true">
+        <a href="#hero" class="dot" data-dot="0"></a>
+        <a href="#servicios" class="dot" data-dot="1"></a>
+        <a href="#categorias" class="dot" data-dot="2"></a>
+        <a href="#proceso" class="dot" data-dot="3"></a>
+        <a href="#clientes" class="dot" data-dot="4"></a>
+        <a href="#contacto" class="dot" data-dot="5"></a>
+    </div>
+
+    <!-- ===== HERO (Panel 1) ===== -->
+    <!-- ===== HERO (Panel 1) ===== -->
+    <!-- ===== HERO (Panel 1) ===== -->
+    <section id="hero" class="panel mesh-1 mesh-fixed">
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-12 gap-10 items-center">
+            <!-- Columna izquierda (igual) -->
+            <div class="md:col-span-7">
+                <div class="badge-gradient font-bold inline-block mb-4 chip rounded-full px-3 py-1 text-[11px] uppercase tracking-widest wipe"
+                    data-aos="fade-up" data-aos-anchor="#hero">
+                    <span class="mr-1">⚡</span> Logística ágil & confiable
+                </div>
+
+                <h1 class="title-font stroke text-4xl leading-tight md:text-6xl md:leading-[1.05] wipe"
+                    data-aos="fade-up" data-aos-delay="60" data-aos-anchor="#hero">
+                    Impulsamos la
+                    <span class="bg-clip-text text-transparent"
+                        style="background-image:linear-gradient(90deg,var(--pink),var(--lime));" data-aos="fade-up"
+                        data-aos-delay="140" data-aos-anchor="#hero">
+                        distribución
+                    </span>
+                    de tus productos con
+                    <span class="bg-clip-text text-transparent"
+                        style="background-image:linear-gradient(90deg,var(--green),var(--blue));" data-aos="fade-up"
+                        data-aos-delay="220" data-aos-anchor="#hero">
+                        eficiencia
+                    </span>
+                    y
+                    <span class="bg-clip-text text-transparent"
+                        style="background-image:linear-gradient(90deg,var(--orange),var(--purple));" data-aos="fade-up"
+                        data-aos-delay="300" data-aos-anchor="#hero">
+                        confianza
+                    </span>
+                </h1>
+
+                <p class="mt-5 text-white/85 max-w-2xl text-base md:text-lg wipe" data-aos="fade-up"
+                    data-aos-delay="380" data-aos-anchor="#hero">
+                    Hacemos que tus productos lleguen con la eficiencia que necesitas y la confianza que tu negocio
+                    merece, integrando diversas categorías en una sola operación de distribución.
+                </p>
+
+                <div id="cta" class="mt-7 flex flex-wrap items-center gap-3" data-aos="fade-up" data-aos-delay="160">
+                    <a href="#contacto" class="btn-glow rounded-2xl px-5 py-3 font-extrabold title-font"
+                        style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">
+                        ¡Quiero cotizar!
+                    </a>
+                    <a href="#categorias"
+                        class="rounded-2xl px-5 py-3 font-semibold border border-white/20 hover:border-white/40 transition">
+                        Ver categorías
+                    </a>
+                </div>
+            </div>
+
+            <!-- Columna derecha: VIDEO YOUTUBE + badge flotante -->
+            <div class="md:col-span-5 relative">
+                <div class="neon-frame rotate-3 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,.45)] wipe"
+                    data-aos="zoom-in-left" data-aos-delay="120" data-aos-anchor="#hero">
+                    <!-- Contenedor responsive 16:9 -->
+                    <div class="relative w-full aspect-[16/9] bg-black">
+                        <iframe class="absolute inset-0 w-full h-full"
+                            src="https://www.youtube.com/embed/VIDEO_ID?rel=0&modestbranding=1&playsinline=1&mute=1&autoplay=1&loop=1&playlist=VIDEO_ID"
+                            title="Video de presentación" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+
+                <!-- Badge con leve movimiento vertical -->
+                <div class="absolute -left-6 bottom-6 -rotate-6" data-aos="zoom-in-up" data-aos-delay="220"
+                    data-aos-anchor="#hero">
+                    <div class="px-4 py-2 rounded-md font-extrabold title-font float-y"
+                        style="background: linear-gradient(90deg, var(--pink), var(--blue)); box-shadow:0 12px 30px rgba(0,0,0,.38);">
+                        PRE-VENTA · NUEVAS RUTAS
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- MARQUEE -->
+    <div class="marquee bg-[#0b0b0b]">
+        <div class="inner text-white/85">
+            <span class="mx-8 title-font" style="color:var(--lime);">COBERTURA</span>
+            <span class="mx-8"><i class="ri-truck-fill"></i> Distribución</span>
+            <span class="mx-8"><i class="ri-focus-2-fill"></i> Eficiencia</span>
+            <span class="mx-8"><i class="ri-shield-check-fill"></i> Confianza</span>
+            <span class="mx-8"><i class="ri-time-fill"></i> 24/48h</span>
+            <span class="mx-8 title-font" style="color:var(--green);">NACIONAL</span>
+            <!-- loop -->
+            <span class="mx-8 title-font" style="color:var(--lime);">COBERTURA</span>
+            <span class="mx-8"><i class="ri-truck-fill"></i> Distribución</span>
+            <span class="mx-8"><i class="ri-focus-2-fill"></i> Eficiencia</span>
+            <span class="mx-8"><i class="ri-shield-check-fill"></i> Confianza</span>
+            <span class="mx-8"><i class="ri-time-fill"></i> 24/48h</span>
+            <span class="mx-8 title-font" style="color:var(--green);">NACIONAL</span>
+        </div>
+    </div>
+
+    <!-- ===== SERVICIOS (Panel 2) — reverse ===== -->
+    <section id="servicios" class="panel mesh-2 mesh-fixed reverse">
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-12 w-full">
+            <div class="text-center mb-10">
+                <h2 class="title-font stroke text-3xl md:text-4xl wipe" data-aos="fade-up">Servicios de Distribución
+                </h2>
+                <p class="mt-3 text-white/80 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="80">
+                    Soluciones integrales para que tus productos lleguen más lejos, más rápido y con total control.
+                </p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card p-6 transition-transform hover:-translate-y-1 hover:rotate-[.5deg]" data-aos="zoom-in">
+                    <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4"
+                        style="background:linear-gradient(135deg,var(--lime),var(--green)); color:#111;"><i
+                            class="ri-route-fill text-xl"></i></div>
+                    <h3 class="font-bold text-lg mb-1">Ruteo inteligente</h3>
+                    <p class="text-white/80 text-sm">Planificación dinámica para minimizar tiempos y costos.</p>
+                </div>
+                <div class="card p-6 transition-transform hover:-translate-y-1 hover:rotate-[-.5deg]" data-aos="zoom-in"
+                    data-aos-delay="60">
+                    <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4"
+                        style="background:linear-gradient(135deg,var(--blue),var(--green)); color:#111;"><i
+                            class="ri-box-3-fill text-xl"></i></div>
+                    <h3 class="font-bold text-lg mb-1">Picking & Packing</h3>
+                    <p class="text-white/80 text-sm">Procesos por categoría, control de lotes y empaques a medida.</p>
+                </div>
+                <div class="card p-6 transition-transform hover:-translate-y-1 hover:rotate-[.5deg]" data-aos="zoom-in"
+                    data-aos-delay="120">
+                    <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4"
+                        style="background:linear-gradient(135deg,var(--purple),var(--lime)); color:#111;"><i
+                            class="ri-shield-check-fill text-xl"></i></div>
+                    <h3 class="font-bold text-lg mb-1">Trazabilidad</h3>
+                    <p class="text-white/80 text-sm">Tracking en tiempo real y reportes operativos.</p>
+                </div>
+                <div class="card p-6 transition-transform hover:-translate-y-1 hover:rotate-[-.5deg]"
+                    data-aos="zoom-in">
+                    <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4"
+                        style="background:linear-gradient(135deg,var(--orange),var(--lime)); color:#111;"><i
+                            class="ri-exchange-funds-fill text-xl"></i></div>
+                    <h3 class="font-bold text-lg mb-1">Integración ERP</h3>
+                    <p class="text-white/80 text-sm">Pedidos, stock y facturación sincronizados.</p>
+                </div>
+                <div class="card p-6 transition-transform hover:-translate-y-1 hover:rotate-[.5deg]" data-aos="zoom-in"
+                    data-aos-delay="60">
+                    <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4"
+                        style="background:linear-gradient(135deg,var(--pink),var(--lime)); color:#111;"><i
+                            class="ri-time-fill text-xl"></i></div>
+                    <h3 class="font-bold text-lg mb-1">SLA 24/48h</h3>
+                    <p class="text-white/80 text-sm">Compromisos de entrega claros y cumplibles.</p>
+                </div>
+                <div class="card p-6 transition-transform hover:-translate-y-1 hover:rotate-[-.5deg]" data-aos="zoom-in"
+                    data-aos-delay="120">
+                    <div class="h-12 w-12 rounded-full flex items-center justify-center mb-4"
+                        style="background:linear-gradient(135deg,var(--blue),var(--purple)); color:#111;"><i
+                            class="ri-team-fill text-xl"></i></div>
+                    <h3 class="font-bold text-lg mb-1">Atención dedicada</h3>
+                    <p class="text-white/80 text-sm">Gestor de cuenta y soporte permanente.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CATEGORÍAS (Panel 3) ===== -->
+    <!-- ===== CATEGORÍAS (Panel 3) — Badges ===== -->
+    <section id="categorias" class="panel mesh-3">
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+            <div class="text-center mb-8">
+                <h2 class="title-font stroke text-3xl md:text-4xl">CATEGORÍAS</h2>
+                <p class="mt-3 text-white/80 max-w-2xl mx-auto">
+                    Integramos tus líneas en una sola operación: menos fricción, más alcance.
+                </p>
+            </div>
+
+            <ul class="cats-badges" aria-label="Categorías">
+                <li><span class="badge badge--lime">¡Bebidas!</span></li>
+                <li><span class="badge badge--green">Fresh · Snacks</span></li>
+                <li><span class="badge badge--blue">Pop · Limpieza</span></li>
+                <li><span class="badge badge--purple">Cuidado Personal</span></li>
+                <li><span class="badge badge--orange">Hogar</span></li>
+                <li><span class="badge badge--pink">Mascotas</span></li>
+
+                <li><span class="badge badge--lime">Abarrotes</span></li>
+                <li><span class="badge badge--green">Frescos</span></li>
+                <li><span class="badge badge--blue">Gourmet</span></li>
+                <li><span class="badge badge--purple">Belleza</span></li>
+            </ul>
+        </div>
+    </section>
+
+
+
+    <!-- ===== PROCESO (Panel 4) — reverse ===== -->
+    <section id="proceso" class="panel mesh-1 mesh-fixed reverse">
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+            <div class="text-center mb-10">
+                <h2 class="title-font stroke text-3xl md:text-4xl wipe" data-aos="fade-up">¿Cómo trabajamos?</h2>
+                <p class="mt-3 text-white/80 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="80">Flujo claro para
+                    escalar sin fricciones.</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="card p-6 relative" data-aos="fade-up">
+                    <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+                        style="background:linear-gradient(135deg,var(--green),var(--lime)); color:#111;">1</div>
+                    <h3 class="font-bold mb-1">Brief & Diagnóstico</h3>
+                    <p class="text-white/80 text-sm">Volumen, zonas, categorías y SLAs requeridos.</p>
+                </div>
+                <div class="card p-6 relative" data-aos="fade-up" data-aos-delay="60">
+                    <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+                        style="background:linear-gradient(135deg,var(--blue),var(--green)); color:#111;">2</div>
+                    <h3 class="font-bold mb-1">Propuesta & Rutas</h3>
+                    <p class="text-white/80 text-sm">Costeo, ruteo y ventanas de entrega.</p>
+                </div>
+                <div class="card p-6 relative" data-aos="fade-up" data-aos-delay="120">
+                    <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+                        style="background:linear-gradient(135deg,var(--purple),var(--lime)); color:#111;">3</div>
+                    <h3 class="font-bold mb-1">Integración & Piloto</h3>
+                    <p class="text-white/80 text-sm">Conexión con ERP/marketplace y prueba controlada.</p>
+                </div>
+                <div class="card p-6 relative" data-aos="fade-up" data-aos-delay="180">
+                    <div class="absolute -top-4 left-6 h-10 w-10 rounded-full flex items-center justify-center font-extrabold title-font"
+                        style="background:linear-gradient(135deg,var(--orange),var(--green)); color:#111;">4</div>
+                    <h3 class="font-bold mb-1">Despliegue & Escala</h3>
+                    <p class="text-white/80 text-sm">Monitoreo, KPIs y mejora continua.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 px-6 bg-bg-1">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16" data-aos="fade-down">
+                <h2 class="title-font text-4xl md:text-5xl">Nuestra <span class="text-chicha-green">Fuerza</span>
+                    Operativa</h2>
+                <p class="text-gray-400 mt-2">La máquina que nunca para.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="border-4 border-chicha-blue p-6 transform transition-transform duration-300 hover:-translate-y-2"
+                    data-aos="zoom-in" data-aos-delay="100">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-chicha-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="title-font text-2xl text-chicha-blue mb-2">Logística Veloz</h3>
+                    <p class="text-gray-300">Entregas rápidas y seguras. Optimizamos cada ruta para que tus productos no
+                        pierdan ni un segundo en el camino.</p>
+                </div>
+
+                <div class="border-4 border-chicha-pink p-6 transform transition-transform duration-300 hover:-translate-y-2"
+                    data-aos="zoom-in" data-aos-delay="200">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-chicha-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="title-font text-2xl text-chicha-pink mb-2">Tecnología de Punta</h3>
+                    <p class="text-gray-300">Usamos tecnología de seguimiento en tiempo real para darte control total y
+                        visibilidad de tu mercancía.</p>
+                </div>
+
+                <div class="border-4 border-chicha-lime p-6 transform transition-transform duration-300 hover:-translate-y-2"
+                    data-aos="zoom-in" data-aos-delay="300">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-chicha-lime" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="title-font text-2xl text-chicha-lime mb-2">Cobertura Nacional</h3>
+                    <p class="text-gray-300">Desde la costa hasta la selva, nuestra red de distribución garantiza que tu
+                        producto llegue a cada rincón del país.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIOS (Panel 5) ===== -->
+    <section id="clientes" class="panel mesh-2 mesh-fixed">
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+            <div class="text-center mb-10">
+                <h2 class="title-font stroke text-3xl md:text-4xl wipe" data-aos="fade-up">Lo que dicen nuestros
+                    clientes</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <figure class="card p-6" data-aos="zoom-in">
+                    <div class="flex items-center gap-2 text-[var(--lime)] mb-2">
+                        <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                            class="ri-star-fill"></i><i class="ri-star-fill"></i>
+                    </div>
+                    <blockquote class="text-white/90">“Bajamos costos en 18% manteniendo tiempos gracias a su ruteo.”
+                    </blockquote>
+                    <figcaption class="mt-3 text-white/60 text-sm">María G. — Retail Lima</figcaption>
+                </figure>
+                <figure class="card p-6" data-aos="zoom-in" data-aos-delay="80">
+                    <div class="flex items-center gap-2 text-[var(--green)] mb-2">
+                        <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                            class="ri-star-fill"></i><i class="ri-star-half-line"></i>
+                    </div>
+                    <blockquote class="text-white/90">“Integración con nuestro ERP rápida y estable.”</blockquote>
+                    <figcaption class="mt-3 text-white/60 text-sm">Carlos R. — Mayorista</figcaption>
+                </figure>
+                <figure class="card p-6" data-aos="zoom-in" data-aos-delay="140">
+                    <div class="flex items-center gap-2 text-[var(--blue)] mb-2">
+                        <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                            class="ri-star-fill"></i><i class="ri-star-fill"></i>
+                    </div>
+                    <blockquote class="text-white/90">“Tracking claro y soporte que responde.”</blockquote>
+                    <figcaption class="mt-3 text-white/60 text-sm">Ana P. — B2B Bebidas</figcaption>
+                </figure>
+            </div>
+
+            <!-- Banda deslizante -->
+            <!-- <div class="mt-8 overflow-hidden border-t border-b border-white/10">
+                <div class="whitespace-nowrap py-3 animate-[marq_20s_linear_infinite] text-white/80">
+                    <span class="mx-8"><i class="ri-shake-hands-fill"></i> +60 Clientes</span>
+                    <span class="mx-8"><i class="ri-community-fill"></i> +300 Tiendas</span>
+                    <span class="mx-8"><i class="ri-map-pin-2-fill"></i> 8 Ciudades</span>
+                    <span class="mx-8"><i class="ri-bar-chart-2-fill"></i> KPIs en tiempo real</span>
+                    <span class="mx-8"><i class="ri-customer-service-2-fill"></i> Soporte dedicado</span>
+                    <span class="mx-8"><i class="ri-shake-hands-fill"></i> +60 Clientes</span>
+                    <span class="mx-8"><i class="ri-community-fill"></i> +300 Tiendas</span>
+                    <span class="mx-8"><i class="ri-map-pin-2-fill"></i> 8 Ciudades</span>
+                    <span class="mx-8"><i class="ri-bar-chart-2-fill"></i> KPIs en tiempo real</span>
+                    <span class="mx-8"><i class="ri-customer-service-2-fill"></i> Soporte dedicado</span>
+                </div>
+            </div> -->
+        </div>
+        <style>
+            @keyframes marq {
+                from {
+                    transform: translateX(0);
+                }
+
+                to {
+                    transform: translateX(-50%);
+                }
+            }
+        </style>
+    </section>
+
+    <!-- ===== CONTACTO (Panel 6) — reverse ===== -->
+    <section id="contacto" class="panel mesh-3 mesh-fixed reverse">
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-10 items-start">
+            <div>
+                <h2 class="title-font stroke text-3xl wipe" data-aos="fade-up">¿Listo para distribuir más?</h2>
+                <p class="mt-3 text-white/85">Cuéntanos tu volumen, zonas y categorías. Te preparamos una propuesta con
+                    rutas y SLAs.</p>
+                <ul class="mt-5 space-y-2 text-white/85">
+                    <li>✅ Picking y packing por categoría</li>
+                    <li>✅ Integración a ERP/Marketplace</li>
+                    <li>✅ Indicadores en tiempo real</li>
+                </ul>
+            </div>
+            <form class="grid gap-3 card p-5" data-aos="fade-left">
+                <div class="grid sm:grid-cols-2 gap-3">
+                    <input
+                        class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30"
+                        placeholder="Nombre" />
+                    <input
+                        class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30"
+                        placeholder="Empresa" />
+                </div>
+                <div class="grid sm:grid-cols-2 gap-3">
+                    <input type="email"
+                        class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30"
+                        placeholder="Correo" />
+                    <input
+                        class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30"
+                        placeholder="Teléfono" />
+                </div>
+                <textarea rows="4"
+                    class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-white/30"
+                    placeholder="Tu necesidad de distribución"></textarea>
+                <button class="justify-self-start btn-glow rounded-2xl px-6 py-3 font-extrabold title-font"
+                    style="background:linear-gradient(90deg,var(--green),var(--lime)); color:#111;">Enviar
+                    solicitud</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-grad text-white border-t border-white/10">
+        <!-- Cinta chicha superior -->
+        <div class="footer-ribbon">
+            <span class="title-font">Logística ágil</span>
+            <span class="dot"></span>
+            <span class="title-font">Multicategoría</span>
+            <span class="dot"></span>
+            <span class="title-font">Cobertura nacional</span>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-8">
+            <!-- Marca -->
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <!-- <div class="footer-logo h-10 w-10 rounded-full"></div>
+                    <span class="title-font text-lg text-[var(--blue)] footer-logo-text">Distribuidora</span> -->
+                    <img src="https://www.auren.com.pe/images/logo_grupoauren.png" alt="" class="w-[120px]">
+                </div>
+                <p class="text-white/80 text-sm leading-relaxed">
+                    Impulsamos la distribución de tus productos con <b class="text-[var(--lime)]">eficiencia</b> y
+                    <b class="text-[var(--pink)]">confianza</b>. Integraciones ERP, ruteo inteligente y trazabilidad
+                    en tiempo real para retail moderno, mayoristas y bodegas.
+                </p>
+
+                <ul class="mt-4 flex flex-wrap gap-2">
+                    <li class="tag-badge">SLA 24/48h</li>
+                    <li class="tag-badge">Picking &amp; Packing</li>
+                    <li class="tag-badge">KPIs en vivo</li>
+                </ul>
+            </div>
+
+            <!-- Links -->
+            <div>
+                <h4 class="title-font text-lg mb-3">Links</h4>
+                <ul class="space-y-2 text-white/80 text-sm">
+                    <li><a href="#servicios" class="hover:text-white linkish">Servicios</a></li>
+                    <li><a href="#categorias" class="hover:text-white linkish">Categorías</a></li>
+                    <li><a href="#proceso" class="hover:text-white linkish">Proceso</a></li>
+                    <li><a href="#clientes" class="hover:text-white linkish">Testimonios</a></li>
+                </ul>
+            </div>
+
+            <!-- Contacto -->
+            <div>
+                <h4 class="title-font text-lg mb-3">Contacto</h4>
+                <ul class="space-y-2 text-white/80 text-sm">
+                    <li><i class="ri-mail-line mr-1"></i> contacto@distribuidora.pe</li>
+                    <li><i class="ri-phone-fill mr-1"></i> +51 900 000 000</li>
+                    <li><i class="ri-map-pin-2-line mr-1"></i> Lima, Perú</li>
+                </ul>
+
+                <div class="flex gap-3 mt-4">
+                    <a href="#" class="social-btn" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+                    <a href="#" class="social-btn" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+                    <a href="#" class="social-btn" aria-label="LinkedIn"><i class="ri-linkedin-line"></i></a>
+                </div>
+            </div>
+
+            <!-- Cobertura & Horarios (reemplaza suscripción) -->
+            <div>
+                <h4 class="title-font text-lg mb-3">Operación</h4>
+                <ul class="list-dot space-y-2 text-white/80 text-sm">
+                    <li>Almacenes: Lima, Arequipa, Trujillo</li>
+                    <li>Horarios: Lun–Sáb 8:00–20:00</li>
+                    <li>Capacidad: +30K pedidos/mes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="border-t border-white/10 py-5 text-center text-white/60 text-sm">
+            © <span id="year"></span> Distribuidora — Todos los derechos reservados.
+        </div>
+    </footer>
+
+
+    <!-- AOS + Wipe + Cursor JS -->
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        // AOS + flags para habilitar/inhabilitar fallback CSS
+        AOS.init({ once: true, offset: 80, duration: 750, easing: 'ease-out-cubic' });
+        document.documentElement.classList.add('has-aos');
+        if (!window.AOS) document.documentElement.classList.add('no-aos');
+
+        // Año footer
+        const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+
+        // Intersection Observer para FULL WIPE + dots activos
+        const panels = document.querySelectorAll('.panel');
+        const dots = document.querySelectorAll('.dot');
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    const idx = Array.from(panels).indexOf(entry.target);
+                    dots.forEach(d => d.classList.remove('active'));
+                    const d = document.querySelector(`.dot[data-dot="${idx}"]`);
+                    d && d.classList.add('active');
+                }
+            });
+        }, { threshold: .55 });
+        panels.forEach(p => io.observe(p));
+
+        // Smooth scroll en dots
+        dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector(dot.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Cursor personalizado
+        const cur = document.querySelector('.cursor');
+        const halo = document.querySelector('.cursor-halo');
+        let x = innerWidth / 2, y2 = innerHeight / 2, tx = x, ty = y2;
+        const ease = 0.18;
+        function raf() {
+            x += (tx - x) * ease; y2 += (ty - y2) * ease;
+            cur.style.transform = `translate(${tx}px, ${ty}px) translate(-50%,-50%)`;
+            halo.style.transform = `translate(${x}px, ${y2}px) translate(-50%,-50%)`;
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+        addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+
+        // estado "link" del cursor
+        const setLinkState = (on) => document.body.classList.toggle('cursor--link', on);
+        document.querySelectorAll('a, button, .linkish, [role="button"]').forEach(el => {
+            el.addEventListener('mouseenter', () => setLinkState(true));
+            el.addEventListener('mouseleave', () => setLinkState(false));
+        });
+
+        // Accesibilidad: reactivar cursor nativo si usa teclado (Tab)
+        addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                document.body.style.cursor = 'auto';
+                cur.style.display = 'none';
+                halo.style.display = 'none';
+            }
+        });
+    </script>
+
+    <script>
+        // Activa .is-inview cuando cada elemento entra al viewport (una sola vez)
+        (function () {
+            const els = document.querySelectorAll('.reveal-up, .reveal-right, .reveal-left');
+            if (!els.length) return;
+            const io = new IntersectionObserver((entries, obs) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('is-inview');
+                        obs.unobserve(e.target);
+                    }
+                });
+            }, { threshold: .25 });
+            els.forEach(el => io.observe(el));
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const toggle = document.getElementById('navToggle');
+            const icon = document.getElementById('navToggleIcon');
+            const menu = document.getElementById('mobileMenu');
+            const backdrop = document.getElementById('backdrop');
+
+            const links = menu.querySelectorAll('a');
+
+            const openMenu = () => {
+                menu.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+                menu.classList.add('opacity-100', 'translate-y-0');
+                toggle.setAttribute('aria-expanded', 'true');
+                icon.className = 'ri-close-line text-xl';
+                document.documentElement.classList.add('overflow-hidden'); // bloquea scroll del body
+            };
+
+            const closeMenu = () => {
+                menu.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
+                menu.classList.remove('opacity-100', 'translate-y-0');
+                toggle.setAttribute('aria-expanded', 'false');
+                icon.className = 'ri-menu-3-line text-xl';
+                document.documentElement.classList.remove('overflow-hidden');
+            };
+
+            toggle.addEventListener('click', () => {
+                const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+                isOpen ? closeMenu() : openMenu();
+            });
+
+            backdrop.addEventListener('click', closeMenu);
+            links.forEach(a => a.addEventListener('click', closeMenu));
+
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+            // Si pasa a desktop, asegúrate de cerrarlo
+            const mq = window.matchMedia('(min-width: 768px)');
+            mq.addEventListener('change', e => { if (e.matches) closeMenu(); });
+        })();
+    </script>
+
+
+</body>
+
+</html>

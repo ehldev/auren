@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impulso Distribuidora - Eficiencia y Confianza Chicha</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Paleta chicha (neón) */
+            --chicha-pink:    #FF2FB9;
+            --chicha-lime:    #C8FF00;
+            --chicha-green:   #39FF14;
+            --chicha-blue:    #00E5FF;
+            --chicha-purple:  #7A00FF;
+            --chicha-orange:  #FF7A00;
+            --ink:            #0c0a09;
+            --bg-1:           #0b0b0b;
+            --bg-2:           #121212;
+            --bg-3:           #0f0f0f;
+        }
+
+        /* Aplicando la fuente personalizada */
+        .title-font { 
+            font-family: "Bungee", system-ui, sans-serif; 
+        }
+
+        /* Usando las variables CSS con las clases de Tailwind */
+        .bg-chicha-pink { background-color: var(--chicha-pink); }
+        .bg-chicha-lime { background-color: var(--chicha-lime); }
+        .bg-chicha-green { background-color: var(--chicha-green); }
+        .bg-chicha-blue { background-color: var(--chicha-blue); }
+        .bg-chicha-purple { background-color: var(--chicha-purple); }
+        .bg-chicha-orange { background-color: var(--chicha-orange); }
+        .bg-ink { background-color: var(--ink); }
+        .bg-bg-1 { background-color: var(--bg-1); }
+        .bg-bg-2 { background-color: var(--bg-2); }
+
+        .text-chicha-pink { color: var(--chicha-pink); }
+        .text-chicha-lime { color: var(--chicha-lime); }
+        .text-chicha-green { color: var(--chicha-green); }
+        .text-chicha-blue { color: var(--chicha-blue); }
+        .text-chicha-purple { color: var(--chicha-purple); }
+        .text-chicha-orange { color: var(--chicha-orange); }
+
+        .border-chicha-pink { border-color: var(--chicha-pink); }
+        .border-chicha-lime { border-color: var(--chicha-lime); }
+        .border-chicha-green { border-color: var(--chicha-green); }
+        .border-chicha-blue { border-color: var(--chicha-blue); }
+
+        /* Estilo degradado para el título principal, muy chicha */
+        .chicha-gradient-text {
+            background: linear-gradient(45deg, var(--chicha-lime), var(--chicha-pink), var(--chicha-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        /* Efecto de sombra para simular contorno */
+        .chicha-title-shadow {
+            text-shadow: 3px 3px 0px var(--chicha-purple);
+        }
+        
+        /* Patrón de fondo sutil para dar textura */
+        body {
+            background-color: var(--bg-1);
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Clip-path para crear formas diagonales */
+        .diagonal-cut {
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
+    </style>
+</head>
+<body class="bg-bg-1 text-white antialiased overflow-x-hidden">
+
+    <section class="min-h-screen flex items-center justify-center p-6 relative diagonal-cut bg-bg-2">
+        <div class="absolute top-0 left-0 w-32 h-32 bg-chicha-pink blur-3xl opacity-40"></div>
+        <div class="absolute bottom-0 right-0 w-48 h-48 bg-chicha-blue blur-3xl opacity-30"></div>
+        
+        <div class="text-center max-w-4xl z-10" data-aos="fade-up">
+            <h1 class="title-font text-5xl md:text-7xl lg:text-8xl chicha-gradient-text chicha-title-shadow leading-tight">
+                Impulsamos la distribución de tus productos
+            </h1>
+            <p class="mt-6 text-lg md:text-xl max-w-2xl mx-auto text-gray-300">
+                Hacemos que tus productos lleguen con la <span class="text-chicha-lime font-bold">eficiencia</span> que necesitas y la <span class="text-chicha-pink font-bold">confianza</span> que tu negocio merece, integrando diversas categorías en una sola operación.
+            </p>
+            <a href="#contacto" 
+               class="title-font inline-block mt-10 px-10 py-4 bg-chicha-lime text-ink text-xl uppercase tracking-widest transition-transform duration-300 hover:bg-chicha-pink hover:text-white hover:scale-110 hover:rotate-[-2deg]">
+                ¡Empezar ahora!
+            </a>
+        </div>
+    </section>
+
+    <section class="py-20 px-6 bg-bg-1">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16" data-aos="fade-down">
+                <h2 class="title-font text-4xl md:text-5xl">Nuestra <span class="text-chicha-green">Fuerza</span> Operativa</h2>
+                <p class="text-gray-400 mt-2">La máquina que nunca para.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="border-2 border-chicha-blue p-6 transform transition-transform duration-300 hover:-translate-y-2" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-chicha-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="title-font text-2xl text-chicha-blue mb-2">Logística Veloz</h3>
+                    <p class="text-gray-300">Entregas rápidas y seguras. Optimizamos cada ruta para que tus productos no pierdan ni un segundo en el camino.</p>
+                </div>
+
+                <div class="border-2 border-chicha-pink p-6 transform transition-transform duration-300 hover:-translate-y-2" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-chicha-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="title-font text-2xl text-chicha-pink mb-2">Tecnología de Punta</h3>
+                    <p class="text-gray-300">Usamos tecnología de seguimiento en tiempo real para darte control total y visibilidad de tu mercancía.</p>
+                </div>
+                
+                <div class="border-2 border-chicha-lime p-6 transform transition-transform duration-300 hover:-translate-y-2" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="mb-4">
+                        <svg class="w-12 h-12 text-chicha-lime" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <h3 class="title-font text-2xl text-chicha-lime mb-2">Cobertura Nacional</h3>
+                    <p class="text-gray-300">Desde la costa hasta la selva, nuestra red de distribución garantiza que tu producto llegue a cada rincón del país.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="py-24 px-6 bg-bg-2 relative overflow-hidden">
+        <div class="absolute -left-20 -top-20 w-64 h-64 border-8 border-chicha-purple opacity-30 rotate-45" data-aos="fade-right"></div>
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-chicha-orange opacity-20 blur-3xl" data-aos="fade-left"></div>
+
+        <div class="container mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center relative z-10">
+            <div data-aos="fade-right">
+                <h2 class="title-font text-4xl md:text-5xl leading-tight">Tu negocio merece <span class="text-chicha-orange">crecer sin límites.</span></h2>
+                <p class="mt-4 text-gray-300 text-lg">
+                    Nos convertimos en el motor de tu expansión. Olvídate de los dolores de cabeza logísticos y enfócate en lo que mejor sabes hacer: crear productos increíbles.
+                </p>
+                <ul class="mt-6 space-y-3">
+                    <li class="flex items-start">
+                        <svg class="w-6 h-6 text-chicha-green mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span><span class="font-bold">Confianza Total:</span> Tu mercadería, tratada como nuestra.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-6 h-6 text-chicha-green mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span><span class="font-bold">Eficiencia Comprobada:</span> Reducimos costos y tiempos de entrega.</span>
+                    </li>
+                    <li class="flex items-start">
+                         <svg class="w-6 h-6 text-chicha-green mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span><span class="font-bold">Soporte Humano:</span> Siempre hay alguien para atenderte.</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="relative h-80" data-aos="fade-left" data-aos-delay="200">
+                <div class="absolute top-0 left-10 w-full h-full bg-chicha-pink transform -skew-x-12"></div>
+                <div class="absolute top-0 left-0 w-full h-full bg-chicha-blue transform skew-x-12 flex items-center justify-center">
+                    <p class="title-font text-5xl text-ink transform -rotate-6">¡Avanza!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contacto" class="py-20 px-6 bg-chicha-green">
+        <div class="text-center" data-aos="zoom-in-up">
+            <h2 class="title-font text-4xl md:text-6xl text-ink leading-tight">¿Listo para despegar?</h2>
+            <p class="text-ink/80 mt-2 max-w-xl mx-auto">
+                Hablemos de cómo podemos llevar tus productos más lejos.
+            </p>
+            <a href="mailto:contacto@tuempresa.com" class="title-font inline-block mt-8 px-12 py-5 bg-ink text-chicha-lime text-xl uppercase tracking-widest transition-transform duration-300 hover:bg-chicha-purple hover:text-white hover:scale-110">
+                Contactar
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-ink py-8 px-6">
+        <div class="container mx-auto text-center text-gray-500">
+            <p class="title-font text-lg text-chicha-pink">IMPULSO DISTRIBUIDORA</p>
+            <p>&copy; 2025 - Todos los derechos reservados. Hecho con la energía del Perú.</p>
+        </div>
+    </footer>
+
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800, // Duración de la animación
+            once: true, // La animación ocurre solo una vez
+        });
+    </script>
+
+</body>
+</html>
